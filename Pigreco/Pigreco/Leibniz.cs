@@ -8,6 +8,8 @@ namespace Pigreco
 {
     class Leibniz : PiAlgo
     {
+        // Precisione: numero di iterazioni, non corrisponde al numero di cifre dopo la virgola
+
         public Leibniz(int precisione) : base(precisione)
         {
         }
@@ -21,7 +23,7 @@ namespace Pigreco
                 pi += 2.0 / (i * (i + 2));
             }
 
-            return pi;
+            return pi * 4;
         }
     }
 }
