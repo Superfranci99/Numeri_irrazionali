@@ -26,7 +26,7 @@ namespace Pigreco
         /// Calcola il valore di pi greco
         /// </summary>
         /// <returns></returns>
-        public abstract decimal Calcola();
+        public abstract double Calcola();
 
     }
 }
