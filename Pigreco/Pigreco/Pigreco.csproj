@@ -44,6 +44,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BigDecimal.cs" />
     <Compile Include="Leibniz.cs" />
     <Compile Include="Nilakantha.cs" />
     <Compile Include="PiAlgo.cs" />
