@@ -14,6 +14,8 @@ namespace Pigreco
         public List<int> ParteDecimale { get; set; } = new List<int>(); // lista di numeri a coppia
 
         private static char _separatore = '.';
+        private static int _prec = 20;  //precisione nelle divisioni
+        private static BigInteger _precisione = BigInteger.Pow(10, _prec);
 
         public BigDecimal(string numero)
         {
@@ -100,6 +102,18 @@ namespace Pigreco
             string result = (bg1 * bg2).ToString();
             int n = (n1.ParteDecimale.Count + n2.ParteDecimale.Count) * 2;
             result = result.Insert(result.Length - n +1, _separatore.ToString());
+            return new BigDecimal(result);
+        }
+
+        public static BigDecimal operator /(BigDecimal n1, BigDecimal n2)
+        {
+            BigInteger bg1, bg2;
+            bg1 = BigInteger.Parse(n1.ToString().Replace(_separatore.ToString(), "")) * _precisione;
+            bg2 = BigInteger.Parse(n2.ToString().Replace(_separatore.ToString(), ""));
+            string result = (bg1 / bg2).ToString();
+            int n = _precisione.ToString().Length - 1;
+            result = result.PadLeft(n + 1, '0');
+            result = result.Insert(result.Length - n + 2, _separatore.ToString());
             return new BigDecimal(result);
         }
     }
