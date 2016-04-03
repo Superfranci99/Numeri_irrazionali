@@ -11,11 +11,7 @@ namespace Pigreco
         /// <summary>
         /// Numero di cifre da calcolare dopo la virgola
         /// </summary>
-        public int Precisione
-        {
-            get { return Precisione; }
-            set { if (value > 0) Precisione = value; else Precisione = 1; }
-        }
+        public int Precisione { get; set; }
 
         public PiAlgo(int precisione)
         {
@@ -26,7 +22,7 @@ namespace Pigreco
         /// Calcola il valore di pi greco
         /// </summary>
         /// <returns></returns>
-        public abstract double Calcola();
+        public abstract BigDecimal Calcola();
 
     }
 }

@@ -14,14 +14,14 @@ namespace Pigreco
         {
         }
 
-        public override double Calcola()
+        public override BigDecimal Calcola()
         {
-            double pi = 3;
+            BigDecimal pi = new BigDecimal(3);
             bool flag = true;
             for (int i = 2; i < Precisione; i += 2)
             {
-                if (flag) pi += 4.0 / (i * (i + 1) * (i + 2));
-                else pi -= 4.0 / (i * (i + 1) * (i + 2));
+                if (flag) pi += new BigDecimal(4) / (new BigDecimal(i) * new BigDecimal(i + 1) * new BigDecimal(i + 2));
+                else      pi -= new BigDecimal(4) / (new BigDecimal(i) * new BigDecimal(i + 1) * new BigDecimal(i + 2));
                 flag = !flag;
             }
 

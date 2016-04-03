@@ -9,12 +9,12 @@ namespace Pigreco
 {
     class BigDecimal
     {
-        public int ParteIntera { get; set; }  // 3 --> non deve essere infinitamente grande
+        public BigInteger ParteIntera { get; set; }  // 3 --> non deve essere infinitamente grande
 
         public List<int> ParteDecimale { get; set; } = new List<int>(); // lista di numeri a coppia
 
         private static char _separatore = '.';
-        private static int _prec = 20;  //precisione nelle divisioni
+        private static int _prec = 3000;  //precisione nelle divisioni
         private static BigInteger _precisione = BigInteger.Pow(10, _prec);
 
         public BigDecimal(string numero)
@@ -22,12 +22,12 @@ namespace Pigreco
             // controlli iniziali
             if (string.IsNullOrWhiteSpace(numero)) throw new NullReferenceException("La stringa è nulla");
             numero = numero.Replace(',', _separatore);
-            numero = numero.TrimEnd('0');
+            //numero = numero.TrimEnd('0');
             string[] div = numero.Split(_separatore);
             if (div.Length > 2) throw new ArgumentException("Stringa non convertibile");
 
             // ottiene la parte intera del numero
-            ParteIntera = int.Parse(div[0]);
+            ParteIntera = BigInteger.Parse(div[0]);
 
             if (div.Length == 1) return; // esci se esiste solo la parte intera
 
@@ -47,7 +47,7 @@ namespace Pigreco
 
         public override string ToString()
         {
-            string result = this.ParteIntera.ToString();
+            string result = this.ParteIntera.ToString() + ".";
             foreach (int n in ParteDecimale)
                 result += n.ToString();
             result = result.TrimEnd('0');
@@ -100,8 +100,11 @@ namespace Pigreco
             bg1 = BigInteger.Parse(n1.ToString().Replace(_separatore.ToString(), ""));
             bg2 = BigInteger.Parse(n2.ToString().Replace(_separatore.ToString(), ""));
             string result = (bg1 * bg2).ToString();
+            int aaaa = result.Length;
             int n = (n1.ParteDecimale.Count + n2.ParteDecimale.Count) * 2;
-            result = result.Insert(result.Length - n +1, _separatore.ToString());
+            //int n = _prec;
+            result = result.PadRight(n, '0');
+            if(n > 0) result = result.Insert(result.Length - n + 1, _separatore.ToString());
             return new BigDecimal(result);
         }
 
@@ -111,10 +114,48 @@ namespace Pigreco
             bg1 = BigInteger.Parse(n1.ToString().Replace(_separatore.ToString(), "")) * _precisione;
             bg2 = BigInteger.Parse(n2.ToString().Replace(_separatore.ToString(), ""));
             string result = (bg1 / bg2).ToString();
-            int n = _precisione.ToString().Length - 1;
+            int n = _precisione.ToString().Length - 1; //_prec
+            //int n = _prec;
             result = result.PadLeft(n + 1, '0');
-            result = result.Insert(result.Length - n + 2, _separatore.ToString());
+            result = result.Insert(result.Length - n, _separatore.ToString());
             return new BigDecimal(result);
         }
+
+        public static BigDecimal operator -(BigDecimal n1, BigDecimal n2)
+        {
+            BigDecimal result = new BigDecimal(0);
+            
+            if(n1.ParteDecimale.Count < n2.ParteDecimale.Count)
+            {
+                for (int i = n1.ParteDecimale.Count; i < n2.ParteDecimale.Count; i++)
+                    n1.ParteDecimale.Add(0);
+            }
+            
+
+            // mantieni la parte decimale più piccola di n1, fino ad arrivare alla precisione di n2
+            if (n1.ParteDecimale.Count > n2.ParteDecimale.Count)
+            {
+                for (int i = n1.ParteDecimale.Count - 1; i > n2.ParteDecimale.Count - 1; i--)
+                    result.ParteDecimale.Add(n1.ParteDecimale[i]);
+            }
+
+            //int carry = 0; // resto
+            for (int i = n2.ParteDecimale.Count - 1; i >= 0; i--)
+            {
+                if(n1.ParteDecimale[i] >= n2.ParteDecimale[i]) result.ParteDecimale.Add(n1.ParteDecimale[i] - n2.ParteDecimale[i]);
+                else
+                {
+                    if (i == 0) n1.ParteIntera--;
+                    else n1.ParteDecimale[i - 1]--;
+                    result.ParteDecimale.Add(100 + n1.ParteDecimale[i] - n2.ParteDecimale[i]);
+                }
+            
+            }
+
+            result.ParteIntera = n1.ParteIntera - n2.ParteIntera;
+            result.ParteDecimale.Reverse();
+            return result;
+        }
+
     }
 }
