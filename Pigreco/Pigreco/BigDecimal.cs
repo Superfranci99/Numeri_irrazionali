@@ -23,7 +23,9 @@ namespace Pigreco
             if (div.Length > 2) throw new ArgumentException("Stringa non convertibile");
 
             // ottiene la parte intera del numero
-            ParteIntera = int.Parse(div[0]); 
+            ParteIntera = int.Parse(div[0]);
+
+            if (div.Length == 1) return; // esci se esiste solo la parte intera
 
             // ora la parte decimale...
             if (div[1].Length % 2 == 1) div[1] += "0"; // rende le cifre pari
@@ -34,6 +36,11 @@ namespace Pigreco
             }
         }
 
+        public BigDecimal(int numero)    : this(numero.ToString()) { }
+        public BigDecimal(byte numero)   : this(numero.ToString()) { }
+        public BigDecimal(float numero)  : this(numero.ToString()) { }
+        public BigDecimal(double numero) : this(numero.ToString()) { }
+
         public override string ToString()
         {
             string result = this.ParteIntera.ToString();
@@ -41,6 +48,46 @@ namespace Pigreco
                 result += n.ToString();
             result = result.TrimEnd('0');
             return result;
+        }
+
+        public static BigDecimal operator+(BigDecimal n1, BigDecimal n2)
+        {
+            BigDecimal result = new BigDecimal(0);
+            // n1 deve essere il numero con più cifre dopo la virgola
+            if(n2.ParteDecimale.Count > n1.ParteDecimale.Count)
+            {
+                BigDecimal n3 = n1;
+                n1 = n2;
+                n2 = n3;
+            }
+
+            // mantieni la parte decimale più piccola di n1, fino ad arrivare alla precisione di n2
+            if(n1.ParteDecimale.Count > n2.ParteDecimale.Count)
+            {
+                for (int i = n1.ParteDecimale.Count - 1; i > n2.ParteDecimale.Count - 1; i--)
+                    result.ParteDecimale.Add(n1.ParteDecimale[i]);
+            }
+
+            int carry = 0; // resto
+            for (int i = n2.ParteDecimale.Count - 1; i >= 0; i--)
+            {
+                int somma = n1.ParteDecimale[i] + n2.ParteDecimale[i] + carry;
+                if (somma >= 100)
+                {
+                    result.ParteDecimale.Add(somma % 100);
+                    carry = (somma - (somma % 100)) / 100;
+                }
+                else
+                {
+                    result.ParteDecimale.Add(somma);
+                    carry = 0;
+                }
+            }
+
+            result.ParteIntera = n1.ParteIntera + n2.ParteIntera + carry;
+            result.ParteDecimale.Reverse();
+            return result;
+
         }
     }
 }
