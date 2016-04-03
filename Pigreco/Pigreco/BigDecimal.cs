@@ -14,7 +14,7 @@ namespace Pigreco
         public List<int> ParteDecimale { get; set; } = new List<int>(); // lista di numeri a coppia
 
         private static char _separatore = '.';
-        private static int _prec = 3000;  //precisione nelle divisioni
+        private static int _prec = 3000;  //precisione nel calcolo di divisioni e radice
         private static BigInteger _precisione = BigInteger.Pow(10, _prec);
 
         public BigDecimal(string numero)
@@ -157,5 +157,81 @@ namespace Pigreco
             return result;
         }
 
+        public BigDecimal Sqrt()
+        {
+            string result = "";
+            // separa la parte intera a coppie di due
+            BigInteger parteIntera = ParteIntera;
+            int n;
+            List<int> listaInteri = new List<int>();
+            while(parteIntera > 0)
+            {
+                n = int.Parse(BigInteger.Remainder(parteIntera, 100).ToString());
+                listaInteri.Add(n);
+                parteIntera = (parteIntera - n) / 100;
+            }
+            listaInteri.Reverse();
+
+            //cerca la radice approssimata della prima coppia
+            int x = SearchMinQuadrato(listaInteri[0]);
+            result = x.ToString();
+
+            BigInteger intermedio = listaInteri[0] - x * x;
+
+            // cicla la parte intera
+            for (int i = 1; i < listaInteri.Count; i++)
+            {
+                intermedio = intermedio * 100 + listaInteri[i];
+                int val = SearchMaxProdotto(intermedio, BigInteger.Parse(result) * 20);
+                intermedio -= ((BigInteger.Parse(result) * 20 + val) * val);
+                result += val.ToString();
+            }
+
+            int virgola = result.Length;
+
+            // cicla la parte con la virgola
+            for(int i=0; i < ParteDecimale.Count; i++)
+            {
+                intermedio = intermedio * 100 + ParteDecimale[i];
+                int val = SearchMaxProdotto(intermedio, BigInteger.Parse(result) * 20);
+                intermedio -= ((BigInteger.Parse(result) * 20 + val) * val);
+                result += val.ToString();
+            }
+
+            // se non c'è resto esci
+            if(intermedio == 0)
+            {
+                result = result.Insert(virgola, ".");
+                return new BigDecimal(result);
+            }
+
+            int maxcicli = _prec - (result.Length - virgola);
+
+            for(int i=0; i< maxcicli; i++)
+            {
+                intermedio = intermedio * 100;
+                int val = SearchMaxProdotto(intermedio, BigInteger.Parse(result) * 20);
+                intermedio -= ((BigInteger.Parse(result) * 20 + val) * val);
+                result += val.ToString();
+            }
+
+            result = result.Insert(virgola, ".");
+            return new BigDecimal(result);
+        }
+
+        private int SearchMinQuadrato(int n)
+        {
+            if (n >= 100) throw new ArgumentException();
+            int i = 1;
+            while ((i * i) < n) i++;
+            return i -1;
+        }
+
+        private int SearchMaxProdotto(BigInteger max, BigInteger coeff)
+        {
+            int i = 1;
+            while (((coeff + i) * i) < max) i++;
+            return i -1 ;
+        }
     }
 }
