@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,13 +13,14 @@ namespace Pigreco
 
         public List<int> ParteDecimale { get; set; } = new List<int>(); // lista di numeri a coppia
 
-        private char _separatore = '.';
+        private static char _separatore = '.';
 
         public BigDecimal(string numero)
         {
             // controlli iniziali
             if (string.IsNullOrWhiteSpace(numero)) throw new NullReferenceException("La stringa è nulla");
             numero = numero.Replace(',', _separatore);
+            numero = numero.TrimEnd('0');
             string[] div = numero.Split(_separatore);
             if (div.Length > 2) throw new ArgumentException("Stringa non convertibile");
 
@@ -50,7 +52,7 @@ namespace Pigreco
             return result;
         }
 
-        public static BigDecimal operator+(BigDecimal n1, BigDecimal n2)
+        public static BigDecimal operator +(BigDecimal n1, BigDecimal n2)
         {
             BigDecimal result = new BigDecimal(0);
             // n1 deve essere il numero con più cifre dopo la virgola
@@ -88,6 +90,17 @@ namespace Pigreco
             result.ParteDecimale.Reverse();
             return result;
 
+        }
+
+        public static BigDecimal operator *(BigDecimal n1, BigDecimal n2)
+        {
+            BigInteger bg1, bg2;
+            bg1 = BigInteger.Parse(n1.ToString().Replace(_separatore.ToString(), ""));
+            bg2 = BigInteger.Parse(n2.ToString().Replace(_separatore.ToString(), ""));
+            string result = (bg1 * bg2).ToString();
+            int n = (n1.ParteDecimale.Count + n2.ParteDecimale.Count) * 2;
+            result = result.Insert(result.Length - n +1, _separatore.ToString());
+            return new BigDecimal(result);
         }
     }
 }
