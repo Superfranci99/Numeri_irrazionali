@@ -11,11 +11,11 @@ namespace Pigreco
         /// <summary>
         /// Numero di cifre da calcolare dopo la virgola
         /// </summary>
-        public int Precisione { get; set; }
+        public int Iterazioni { get; set; }
 
-        public PiAlgo(int precisione)
+        public PiAlgo(int iterazioni)
         {
-            this.Precisione = precisione;
+            this.Iterazioni = iterazioni;
         }
 
         /// <summary>

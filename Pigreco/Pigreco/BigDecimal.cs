@@ -14,7 +14,7 @@ namespace Pigreco
         public List<int> ParteDecimale { get; set; } = new List<int>(); // lista di numeri a coppia
 
         private static char _separatore = '.';
-        private static int _prec = 3000;  //precisione nel calcolo di divisioni e radice
+        private static int _prec = 100;  //precisione nel calcolo di divisioni e radice
         private static BigInteger _precisione = BigInteger.Pow(10, _prec);
 
         public BigDecimal(string numero)
@@ -27,7 +27,9 @@ namespace Pigreco
             if (div.Length > 2) throw new ArgumentException("Stringa non convertibile");
 
             // ottiene la parte intera del numero
-            ParteIntera = BigInteger.Parse(div[0]);
+            if (div[0] == "") ParteIntera = BigInteger.Zero;
+            else ParteIntera = BigInteger.Parse(div[0]);
+
 
             if (div.Length == 1) return; // esci se esiste solo la parte intera
 
@@ -49,7 +51,11 @@ namespace Pigreco
         {
             string result = this.ParteIntera.ToString() + ".";
             foreach (int n in ParteDecimale)
-                result += n.ToString();
+            {
+                if(n < 10) result += '0' + n.ToString();
+                else result += n.ToString();
+            }
+                
             result = result.TrimEnd('0');
             return result;
         }
@@ -90,7 +96,8 @@ namespace Pigreco
 
             result.ParteIntera = n1.ParteIntera + n2.ParteIntera + carry;
             result.ParteDecimale.Reverse();
-            return result;
+            result.Clean();
+            return (result);
 
         }
 
@@ -100,25 +107,93 @@ namespace Pigreco
             bg1 = BigInteger.Parse(n1.ToString().Replace(_separatore.ToString(), ""));
             bg2 = BigInteger.Parse(n2.ToString().Replace(_separatore.ToString(), ""));
             string result = (bg1 * bg2).ToString();
-            int aaaa = result.Length;
-            int n = (n1.ParteDecimale.Count + n2.ParteDecimale.Count) * 2;
+            
+
+            int n = 0;
+            if(n1.ParteDecimale.Count > 0)
+            {
+                if (n1.ParteDecimale[n1.ParteDecimale.Count - 1] % 10 == 0) n += (n1.ParteDecimale.Count * 2) - 1;
+                else n += n1.ParteDecimale.Count * 2;
+            }
+
+            if (n2.ParteDecimale.Count > 0)
+            {
+                if (n2.ParteDecimale[n2.ParteDecimale.Count - 1] % 10 == 0) n += (n2.ParteDecimale.Count * 2) - 1;
+                else n += n2.ParteDecimale.Count * 2;
+            }
+
+
+
+
+            //int n = (n1.ParteDecimale.Count + n2.ParteDecimale.Count) * 2;
             //int n = _prec;
+            int aaaa = result.Length;
             result = result.PadRight(n, '0');
-            if(n > 0) result = result.Insert(result.Length - n + 1, _separatore.ToString());
-            return new BigDecimal(result);
+
+            if(n > 0) result = result.Insert(result.Length - n, _separatore.ToString());
+            BigDecimal risul = new BigDecimal(result);
+            risul.Clean();
+            return (risul);
         }
 
         public static BigDecimal operator /(BigDecimal n1, BigDecimal n2)
         {
+            int oldPrec = _prec;
             BigInteger bg1, bg2;
             bg1 = BigInteger.Parse(n1.ToString().Replace(_separatore.ToString(), "")) * _precisione;
             bg2 = BigInteger.Parse(n2.ToString().Replace(_separatore.ToString(), ""));
-            string result = (bg1 / bg2).ToString();
-            int n = _precisione.ToString().Length - 1; //_prec
-            //int n = _prec;
-            result = result.PadLeft(n + 1, '0');
-            result = result.Insert(result.Length - n, _separatore.ToString());
-            return new BigDecimal(result);
+            bool flag = false;
+            while (bg2 > bg1)
+            {
+                flag = true;
+                bg1 *= 10;
+                _prec++;
+            }
+            for(int i=0; (i<oldPrec) && flag; i++)
+            {
+                bg1 *= 10;
+                _prec++;
+            }
+
+            
+            BigInteger numres = (bg1 / bg2);
+            while (numres < _precisione)
+            {
+                bg1 *= 10;
+                _prec++;
+                numres = (bg1 / bg2);
+            }
+            _precisione = BigInteger.Pow(10, _prec);
+
+            string result = numres.ToString();
+            int aaa = result.Length;
+            //int n = _precisione.ToString().Length - 1; //_prec
+            int n = 0;
+            //result = result.PadLeft(n + 1, '0');
+            if (n2.ParteDecimale.Count > 0)
+            {
+                if (n2.ParteDecimale[n2.ParteDecimale.Count - 1] % 10 == 0) n += (n2.ParteDecimale.Count * 2) - 1;
+                else n += n2.ParteDecimale.Count * 2;
+            }
+
+
+
+            //TOFIXXXXXXXXXXXXXXX
+
+
+
+
+            int virgola = Math.Abs(n - _prec);
+            result = result.PadLeft(_prec, '0');
+            //int virgola = Math.Abs(n - _prec);
+            //result = result.PadLeft(_prec, '0');
+
+            result = result.Insert(result.Length - virgola, _separatore.ToString());
+            BigDecimal risul = new BigDecimal(result);
+            risul.Clean();
+            _prec = oldPrec;
+            _precisione = BigInteger.Pow(10, _prec);
+            return (risul);
         }
 
         public static BigDecimal operator -(BigDecimal n1, BigDecimal n2)
@@ -154,7 +229,8 @@ namespace Pigreco
 
             result.ParteIntera = n1.ParteIntera - n2.ParteIntera;
             result.ParteDecimale.Reverse();
-            return result;
+            result.Clean();
+            return (result);
         }
 
         public BigDecimal Sqrt()
@@ -216,14 +292,16 @@ namespace Pigreco
             }
 
             result = result.Insert(virgola, ".");
-            return new BigDecimal(result);
+            BigDecimal risul = new BigDecimal(result);
+            risul.Clean();
+            return (risul);
         }
 
         private int SearchMinQuadrato(int n)
         {
             if (n >= 100) throw new ArgumentException();
             int i = 1;
-            while ((i * i) < n) i++;
+            while ((i * i) <= n) i++;
             return i -1;
         }
 
@@ -232,6 +310,16 @@ namespace Pigreco
             int i = 1;
             while (((coeff + i) * i) < max) i++;
             return i -1 ;
+        }
+
+        public void Clean()
+        {
+            int i=ParteDecimale.Count-1;
+            while ((i>=0) && (ParteDecimale[i] == 0))
+            {
+                ParteDecimale.RemoveAt(i);
+                i--;
+            }
         }
     }
 }

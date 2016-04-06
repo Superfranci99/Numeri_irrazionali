@@ -10,6 +10,10 @@ namespace Pigreco
     {
         static void Main(string[] args)
         {
+            PiAlgo p = new Nilakantha(100);
+            Console.WriteLine(p.Calcola());
+            Console.Read();
+            
         }
     }
 }
