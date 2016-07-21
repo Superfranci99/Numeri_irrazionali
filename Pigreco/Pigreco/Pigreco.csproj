@@ -45,7 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BigDecimal.cs" />
-    <Compile Include="Classico.cs" />
+    <Compile Include="Cusano.cs" />
     <Compile Include="Leibniz.cs" />
     <Compile Include="Nilakantha.cs" />
     <Compile Include="PiAlgo.cs" />

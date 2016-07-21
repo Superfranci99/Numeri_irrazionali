@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Pigreco
 {
-    class Classico : PiAlgo
+    class Cusano : PiAlgo
     {
-        public Classico(int iterazioni) : base(iterazioni) { }
+        public Cusano(int iterazioni) : base(iterazioni) { }
 
         public override BigDecimal Calcola()
         {
@@ -19,7 +19,7 @@ namespace Pigreco
             {
                 c = new BigDecimal(0.5) * ((new BigDecimal(1) / i) + (new BigDecimal(1) / c));
                 c = new BigDecimal(1) / c;
-                i = ( i * c);
+                i = (i * c);
                 i = i.Sqrt();
             }
 
